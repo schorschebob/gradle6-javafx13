@@ -1,3 +1,42 @@
-FROM gradle:jdk8
+FROM openjdk:8-jdk
 
-RUN apt-get update && apt-get install -y openjfx
+CMD ["gradle"]
+
+ENV GRADLE_HOME /opt/gradle
+
+RUN set -o errexit -o nounset \
+    && echo "Adding gradle user and group" \
+    && groupadd --system --gid 1000 gradle \
+    && useradd --system --gid gradle --uid 1000 --shell /bin/bash --create-home gradle \
+    && mkdir /home/gradle/.gradle \
+    && chown --recursive gradle:gradle /home/gradle \
+    \
+    && echo "Symlinking root Gradle cache to gradle Gradle cache" \
+    && ln -s /home/gradle/.gradle /root/.gradle
+
+VOLUME /home/gradle/.gradle
+
+WORKDIR /home/gradle
+
+RUN apt-get update && apt-get install -y --no-install-recommends openjfx wget unzip
+RUN rm -rf /var/lib/apt/lists/*
+RUN cp /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/* /usr/local/openjdk-8/jre/lib/ext
+
+
+ENV GRADLE_VERSION 5.6.2
+ARG GRADLE_DOWNLOAD_SHA256=32fce6628848f799b0ad3205ae8db67d0d828c10ffe62b748a7c0d9f4a5d9ee0
+RUN set -o errexit -o nounset \
+    && echo "Downloading Gradle" \
+    && wget --no-verbose --output-document=gradle.zip "https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip" \
+    \
+    && echo "Checking download hash" \
+    && echo "${GRADLE_DOWNLOAD_SHA256} *gradle.zip" | sha256sum --check - \
+    \
+    && echo "Installing Gradle" \
+    && unzip gradle.zip \
+    && rm gradle.zip \
+    && mv "gradle-${GRADLE_VERSION}" "${GRADLE_HOME}/" \
+    && ln --symbolic "${GRADLE_HOME}/bin/gradle" /usr/bin/gradle \
+    \
+    && echo "Testing Gradle installation" \
+    && gradle --version
