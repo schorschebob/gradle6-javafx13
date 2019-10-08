@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk
+FROM openjdk:13-jdk-oracle
 
 CMD ["gradle"]
 
@@ -18,12 +18,14 @@ VOLUME /home/gradle/.gradle
 
 WORKDIR /home/gradle
 
-RUN apt-get update && apt-get install -y --no-install-recommends openjfx wget unzip
+RUN yum -y update
+RUN yum -y install openjfx wget unzip
 RUN rm -rf /var/lib/apt/lists/*
-RUN cp /usr/lib/jvm/java-8-openjdk-amd64/jre/lib/ext/* /usr/local/openjdk-8/jre/lib/ext
+# RUN ls /usr/lib/jvm/
+# RUN cp /usr/lib/jvm/java-13-openjdk-amd64/jre/lib/ext/* /usr/local/openjdk-13/jre/lib/ext
 
 
-ENV GRADLE_VERSION 5.6.2
+ENV GRADLE_VERSION 5.6.2 
 ARG GRADLE_DOWNLOAD_SHA256=32fce6628848f799b0ad3205ae8db67d0d828c10ffe62b748a7c0d9f4a5d9ee0
 RUN set -o errexit -o nounset \
     && echo "Downloading Gradle" \
