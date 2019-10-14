@@ -1,6 +1,8 @@
 # Docker image for checking javafx application
 
-An image containing Gradle 5.* openjdk 13 and openjfx for javafx support.
+WIP: Waiting for offical release of gradle 6.0...
+
+An image containing Gradle 6.* openjdk 13 and openjfx for javafx support.
 
 ___
 
